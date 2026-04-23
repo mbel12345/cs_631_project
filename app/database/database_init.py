@@ -14,8 +14,6 @@ def drop_db(engine: Engine) -> None:
 
 if __name__ == '__main__':
 
-    # no cover is specified in the example code, which makes sense as this is a main method
-
-    engine = get_engine() # pragma: no cover
-    drop_db(engine=engine) # pragma: no cover
-    init_db(engine=engine) # pragma: no cover
+    engine = get_engine()
+    drop_db(engine=engine)
+    init_db(engine=engine)
