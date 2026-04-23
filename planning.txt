@@ -1,7 +1,7 @@
 User View:
 
 1) Reservation Page: Drop-down for location -> show cars -> click on car -> do you want to register?
-2) Activity / History Page: ist of current  / old reservations. For pending reservations, give the option to delete.
+2) Activity / History Page: list of current  / old reservations. For pending reservations, give the option to delete.
 If there is a rental agreement, the Reservation ID column would be non-empty and would be a link to the rental agreement.
 
 Admin View:
