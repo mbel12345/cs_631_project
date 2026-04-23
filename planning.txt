@@ -1,0 +1,16 @@
+User View:
+
+1) Reservation Page: Drop-down for location -> show cars -> click on car -> do you want to register?
+2) Activity / History Page: ist of current  / old reservations. For pending reservations, give the option to delete.
+If there is a rental agreement, the Reservation ID column would be non-empty and would be a link to the rental agreement.
+
+Admin View:
+
+1) Reservation Page
+  - Show all reservations for any user (including a link to the Rental Agreement if it exists)
+  - "Create New" button for over-the-phone reservations
+2) Rental Agreement Page
+  - Create New
+  - Search reservations by customer first name - which will provide list of reservations
+  - Then select the pending one and click on "Create New" button to fill rental details
+  - Rental Agreement is created, which can be viewed by clicking on a link in the reservation
