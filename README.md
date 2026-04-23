@@ -38,3 +38,14 @@ In WSL/VS Code Terminal:
 ```bash
 python3 -m app.populate_tables
 ```
+
+## Run FastAPI app locally
+In WSL/VS Code Terminal:
+```bash
+python3 -m app.main
+```
+
+## Using the App
+Pgadmin: http://localhost:5050/
+Swagger UI locally: http://localhost:8001/docs
+Swagger UI in container: http://localhost:8000/docs
