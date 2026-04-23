@@ -32,3 +32,9 @@ In WSL/VS Code Terminal:
 docker compose down -v
 docker compose up --build
 ```
+
+## Import sample data
+In WSL/VS Code Terminal:
+```bash
+python3 -m app.populate_tables
+```
