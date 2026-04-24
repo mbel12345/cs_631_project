@@ -10,8 +10,8 @@
     <form method="get" action="/user/reservations">
         <label>Select Location:</label>
         <select name="location_id">
-            {% for address in ['TODO', 'get-from-api-call'] %}
-                <option value="{{ loop.index }}">{{ address }}</option>
+            {% for loc in locations %}
+                <option value="{{ loop.index }}">{{ loc.location_id }} - {{ loc.address}}</option>
             {% endfor %}
         </select>
         <button type="submit">Show Cars</button>
