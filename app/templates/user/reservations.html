@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Make a Reservation</title>
+</head>
+<body>
+
+    <h2>Make a Reservation</h2>
+
+    <form method="get" action="/user/reservations">
+        <label>Select Location:</label>
+        <select name="location_id">
+            {% for address in ['TODO', 'get-from-api-call'] %}
+                <option value="{{ loop.index }}">{{ address }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Show Cars</button>
+    </form>
+
+    <hr>
+
+    <h3>Available Cars</h3>
+    <ul>
+        {% for car in [{'make': 'Ford', 'model': 'Mustang', 'class_name': 'Pickup'}] %}
+            <li>
+                {{ car.make }} {{ car.model }} ({{ car.class_name }})
+                <form method="post" action="/user/reservations/create" style="display:inline;">
+                    <input type="hidden" name="car_id" value="{{ car.id }}">
+                    <button type="submit">Reserve this car</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

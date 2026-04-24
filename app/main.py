@@ -3,6 +3,9 @@ from fastapi import FastAPI
 
 from app.database import get_engine
 from app.database.database_init import init_db
+from app.routers.admin import router as admin_router
+from app.routers.login import router as login_router
+from app.routers.user import router as user_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,7 +24,6 @@ app = FastAPI(
     debug=True,
 )
 
-if __name__ == '__main__':
-
-    import uvicorn
-    uvicorn.run('app.main:app', host='127.0.0.1', port=8001, log_level='info')
+app.include_router(login_router)
+app.include_router(user_router)
+app.include_router(admin_router)

@@ -42,7 +42,7 @@ python3 -m app.populate_tables
 ## Run FastAPI app locally
 In WSL/VS Code Terminal:
 ```bash
-python3 -m app.main
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8001
 ```
 
 ## Using the App
