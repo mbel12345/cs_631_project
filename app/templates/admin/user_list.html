@@ -6,6 +6,26 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 78vh;
+        }
+
+        .table-responsive thead th {
+            position: sticky;
+            top: 0;
+            background: #212529;
+            color: white;
+            z-index: 20;
+        }
+
         .search-row {
             display: flex;
             gap: 1rem;
@@ -50,7 +70,7 @@
 
     <!-- Main table -->
     <div class="card-body p-0">
-        <table class="table table-striped mb-0">
+        <table class="table table-responsive table-striped table-bordered mb-0">
             <thead class="table-dark">
                 <tr>
                     <th>Last Name</th>
