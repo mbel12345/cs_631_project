@@ -87,7 +87,7 @@ CREATE TABLE Rental_Agreement (
     Credit_Card_Type VARCHAR(50) NOT NULL,
     Credit_Card_Number CHAR(16) NOT NULL,
     Credit_Card_Expiry_Month INT NOT NULL,
-    Credit_Card_Expiry_Year INT,
+    Credit_Card_Expiry_Year INT NOT NULL,
     Total_Cost DOUBLE PRECISION,
     FOREIGN KEY (Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time) REFERENCES Reservation(Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
         ON DELETE CASCADE
