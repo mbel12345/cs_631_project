@@ -326,11 +326,31 @@ def reservation_page(
 @router.get('/admin/users')
 def users_list(
     request: Request,
+    username: Optional[str] = None,
+    first_name: Optional[str] = None,
+    last_name: Optional[str] = None,
+    address: Optional[str] = None,
     user = Depends(get_current_admin_user),
     db: Session = Depends(get_db)):
 
+    conditions = [
+        '1 = 1',
+    ]
+
+    if username and username.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(username) LIKE '%{username.lower()}%'")
+
+    if first_name and first_name.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(split_part(customer_name, ' ', 1)) LIKE '%{first_name.lower()}%'")
+
+    if last_name and last_name.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(split_part(customer_name, ' ', 2)) LIKE '%{last_name.lower()}%'")
+
+    if address and address.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(customer_address) LIKE '%{address.lower()}%'")
+
     users = db.execute(
-        text('''
+        text(f'''
             SELECT
                 split_part(customer_name, ' ', 1) AS first_name,
                 split_part(customer_name, ' ', 2) AS last_name,
@@ -338,7 +358,10 @@ def users_list(
                 username,
                 is_admin
             FROM Users
+            WHERE
+                {' AND '.join(conditions)}
             ORDER BY last_name, first_name, address ASC
+
         '''
         )
     ).fetchall()
