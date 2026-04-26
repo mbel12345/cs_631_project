@@ -1,16 +1,78 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Make a Reservation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
+
 <body>
 
     <div class="w-50 mx-auto p-4 border rounded bg-white shadow-sm">
-        <a href="/logout" class="btn btn-outline-danger">Logout</a>
-        <h2>Welcome, {{ first_name }} {{ last_name }}</h2>
-        <h2>Make a Reservation</h2>
+        <h2>Welcome, {{ first_name }}!</h2>
+        <h2>Please make a reservation</h2>
+        <form method="post" action="/admin/new-reservation" class="w-50 mx-auto mt-5 p-4 border rounded bg-white shadow-sm">
+            {% if request.query_params.get("success") %}
+            <div class="alert alert-success">Reservation created</div>
+            {% endif %}
+            {% if request.query_params.get("exists") %}
+            <div class="alert alert-danger">Reservation already exists.</div>
+            {% endif %}
+            {% if request.query_params.get("error") %}
+            <div class="alert alert-danger">Reservation failed. Please try again.</div>
+            {% endif %}
+            <label class="form-label">Customer Name</label>
+            <select name="customer" class="form-select">
+                {% for customer in customers %}
+                  <option value="{{ customer.name }} ~ {{ customer.address }}">{{ customer.name }} - {{ customer.address }}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label">Location</label>
+            <select name="pickup_location_id" class="form-select">
+                {% for location in locations %}
+                  <option value="{{ location.location_id }} ~ {{ location.address }}">{{ location.location_id }} - {{ location.address }}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label">Car Class</label>
+            <select name="class_name" class="form-select">
+                {% for car_class in car_classes %}
+                  <option value="{{ car_class }}">{{ car_class }}</option>
+                {% endfor %}
+            </select>
+            <div class="mb-3">
+                <label class="form-label">Pickup Date & Time</label>
+                <input type="text" class="form-control" id="pickup_date_time" name="pickup_date_time">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Return Date & Time</label>
+                <input type="text" class="form-control" id="return_date_time" name="return_date_time">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
     </div>
-
 </body>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+        flatpickr("#pickup_date_time", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: false
+        })
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        flatpickr("#return_date_time", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: false
+        })
+    });
+
+</script>
+
 </html>

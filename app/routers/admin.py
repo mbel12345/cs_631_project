@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.jwt import get_current_admin_user
@@ -21,6 +23,108 @@ def home(
             'request': request,
         },
     )
+
+@router.get('/admin/new-reservation')
+def new_reservation_form(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    customers = db.execute(
+        text('''
+            SELECT
+                Customer_Name AS name,
+                Customer_Address AS address
+            FROM
+                Customer
+            ORDER BY
+                name ASC,
+                address ASC
+        ''')
+    ).fetchall()
+
+    locations = db.execute(
+        text('''
+            SELECT
+                Location_ID AS location_id,
+                Address AS address
+            FROM
+                Location
+            ORDER BY
+                Location_ID ASC
+        ''')
+    ).fetchall()
+
+    car_classes = db.execute(
+        text('''
+            SELECT
+                Class_Name AS car_class
+            FROM
+                Car_Class
+            ORDER BY
+                car_class ASC
+        ''')
+    ).fetchall()
+
+    car_classes = [c[0] for c in car_classes]
+
+    return templates.TemplateResponse(
+        'user/new_reservation.html',
+        {
+            'request': request,
+            'first_name': user['first_name'],
+            'customers': customers,
+            'locations': locations,
+            'car_classes': car_classes,
+        },
+    )
+
+@router.post('/admin/new-reservation')
+async def new_reservation(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    form = await request.form()
+
+    customer_name = (form['customer'].split('~')[0]).strip()
+    customer_address = '~'.join(form['customer'].split('~')[1:]).strip()
+    pickup_location_id = (form['pickup_location_id'].split('~')[0]).strip()
+    class_name = form['class_name'].strip()
+    pickup_date_time = form['pickup_date_time'].strip()
+    return_date_time = form['return_date_time'].strip()
+
+    try:
+        db.execute(text('''
+            INSERT INTO Reservation (Customer_Name, Customer_Address, Pickup_Location_ID, Class_Name, Pickup_Date_Time, Return_Date_Time)
+            VALUES (:customer_name, :customer_address, :pickup_location_id, :class_name, :pickup_date_time, :return_date_time)'''),
+            {
+                'customer_name': customer_name,
+                'customer_address': customer_address,
+                'pickup_location_id': pickup_location_id,
+                'class_name': class_name,
+                'pickup_date_time': pickup_date_time,
+                'return_date_time': return_date_time,
+            },
+        )
+
+        db.commit()
+
+        return RedirectResponse('/admin/new-reservation?success=1', status_code=303)
+
+    except IntegrityError as e:
+
+        print(e)
+        db.rollback()
+        return RedirectResponse('/admin/new-reservation?exists=1', status_code=303)
+
+    except Exception as e:
+
+        print(e)
+        db.rollback()
+        return RedirectResponse('/admin/new-reservation?error=1', status_code=303)
 
 @router.get('/admin/reservations')
 def reservation_page(
