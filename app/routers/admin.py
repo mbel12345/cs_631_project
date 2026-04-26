@@ -1,9 +1,12 @@
+import traceback
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 from app.auth.jwt import get_current_admin_user
 from app.database import get_db
@@ -21,6 +24,7 @@ def home(
         'admin/index.html',
         {
             'request': request,
+            'user': user['first_name'],
         },
     )
 
@@ -125,6 +129,122 @@ async def new_reservation(
         print(e)
         db.rollback()
         return RedirectResponse('/admin/new-reservation?error=1', status_code=303)
+
+@router.get('/admin/new-rental')
+def new_rental_form(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    # Pull up all reservations that don't have a rental agreement
+
+    reservations = db.execute(
+        text('''
+            SELECT
+                R.Customer_Name AS customer_name,
+                R.Customer_Address AS customer_address,
+                R.Pickup_Location_ID AS pickup_location_id,
+                TO_CHAR(R.Pickup_Date_Time, 'YYYY-MM-DD HH24:MI') as pickup_date_time
+            FROM
+                Reservation AS R
+            LEFT OUTER JOIN Rental_Agreement AS C ON
+                R.Customer_Name = C.Customer_Name AND
+                R.Customer_Address = C.Customer_Address AND
+                R.Pickup_Location_ID = C.Pickup_Location_ID AND
+                R.Pickup_Date_Time = C.Pickup_Date_Time
+            WHERE C.Contract_Number is NULL
+            ORDER BY
+                R.pickup_date_time DESC,
+                R.customer_name ASC
+        ''')
+    ).fetchall()
+
+    cars = db.execute(
+        text('''
+            SELECT
+                C.VIN AS vin,
+                C.Location_ID AS location_id,
+                M.Car_Class AS car_class,
+                M.Make AS make,
+                M.Model AS model,
+                M.Year_ AS year
+            FROM
+                Car AS C
+            JOIN
+                Car_Model AS M ON C.Model_ID = M.Model_ID
+            ORDER BY
+                Location_ID ASC,
+                VIN ASC
+        ''')
+    ).fetchall()
+
+    return templates.TemplateResponse(
+        'user/new_rental.html',
+        {
+            'request': request,
+            'first_name': user['first_name'],
+            'reservations': reservations,
+            'cars': cars,
+        },
+    )
+
+@router.post('/admin/new-rental')
+async def new_rental(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    form = await request.form()
+
+    customer_name = (form['reservation'].split('~')[0]).strip()
+    customer_address = (form['reservation'].split('~')[1]).strip()
+    pickup_location_id = (form['reservation'].split('~')[2]).strip()
+    pickup_date_time = (form['reservation'].split('~')[3]).strip()
+    vin = (form['vin'].split('~')[0]).strip()
+
+    data = {
+        'Customer_Name': customer_name,
+        'Customer_Address': customer_address,
+        'Pickup_Location_ID': pickup_location_id,
+        'Pickup_Date_Time': pickup_date_time,
+        'vin': vin,
+        'Contract_Number': uuid4(),
+    }
+
+    for field in ['Start_Date_Time', 'End_Date_Time', 'Start_Odometer_Reading', 'End_Odometer_Reading', 'License_State', 'License_Number', 'License_Expiry_Month', 'License_Expiry_Year', 'Credit_Card_Type', 'Credit_Card_Number', 'Credit_Card_Expiry_Month', 'Credit_Card_Expiry_Year', 'Total_Cost']:
+
+        value = form[field.lower()].strip()
+        data[field] = value if value else None
+
+    keys = list(data.keys())
+    query = f"""
+        INSERT INTO Rental_Agreement ({', '.join(keys)})
+        VALUES ({', '.join(':' + k for k in keys)})
+    """.strip()
+    print(f'Insert Rental Query:\n{query}')
+    try:
+        db.execute(
+            text(query),
+            data,
+        )
+
+        db.commit()
+
+        return RedirectResponse('/admin/new-rental?success=1', status_code=303)
+
+    except IntegrityError as e:
+
+        print(e)
+        db.rollback()
+        return RedirectResponse('/admin/new-rental?exists=1', status_code=303)
+
+    except Exception as e:
+
+        print(traceback.format_exc())
+        db.rollback()
+        return RedirectResponse('/admin/new-rental?error=1', status_code=303)
 
 @router.get('/admin/reservations')
 def reservation_page(

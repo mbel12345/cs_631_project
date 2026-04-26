@@ -94,7 +94,8 @@ CREATE TABLE Rental_Agreement (
         ON UPDATE CASCADE,
     FOREIGN KEY (VIN) REFERENCES Car(VIN)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+    Unique(Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
 );
 
 CREATE TABLE Users (

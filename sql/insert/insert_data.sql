@@ -95,7 +95,6 @@ INSERT INTO Reservation (Class_Name, Customer_Name, Customer_Address, Pickup_Loc
 ('SUV', 'John Smith', '2 South Street, Buffalo, NY 01555', 'New York 1', 'pending', '2026-02-01 06:00:00', '2026-02-07 08:00:00'),
 ('SUV', 'Kelly Jones', '3 Main Street, Omaha, NE 04555', 'New York 1', 'pending', '2026-04-01 06:00:00', '2026-04-10 12:00:00'),
 ('Van', 'Val Smith', '5 Johnson Drive, New Brunswick, NJ 08818', 'Boston Fast Rental', NULL, '2026-04-10 09:00:00', '2026-04-20 09:00:00'),
-('Van', 'Val Smith', '5 Johnson Drive, New Brunswick, NJ 08818', 'Boston Fast Rental', 'cancelled', '2026-05-01 09:00:00', '2026-05-10 18:00:00'),
 ('Compact', 'Peter Miles', '10 River Rd, Trenton, NJ 08810', 'Chicago Central', NULL, '2026-03-01 08:00:00', '2026-03-05 10:00:00'),
 ('Economy', 'Maria Lopez', '22 Palm Ave, Miami, FL 33101', 'Miami Beach', NULL, '2026-03-10 09:00:00', '2026-03-12 09:00:00'),
 ('Pickup', 'Chen Wu', '88 Market St, San Francisco, CA 94103', 'San Francisco Main', 'pending', '2026-06-01 07:00:00', '2026-06-08 07:00:00'),
@@ -104,8 +103,11 @@ INSERT INTO Reservation (Class_Name, Customer_Name, Customer_Address, Pickup_Loc
 ('Hybrid', 'Emma Davis', '12 Pine St, Boston, MA 02110', 'Boston Fast Rental', NULL, '2026-09-01 08:00:00', '2026-09-03 08:00:00'),
 ('Premium SUV', 'Noah Wilson', '33 Maple St, Dallas, TX 75002', 'Dallas Hub', NULL, '2026-10-01 06:00:00', '2026-10-08 06:00:00'),
 ('Full-Size', 'Olivia Clark', '44 Cedar St, Phoenix, AZ 85002', 'Phoenix Downtown', NULL, '2026-11-01 07:00:00', '2026-11-05 07:00:00'),
-('Offroad', 'Sophia Young', '99 Elm St, Portland, OR 97215', 'Portland East', NULL, '2026-12-01 08:00:00', '2026-12-10 08:00:00');
-
+('Offroad', 'Sophia Young', '99 Elm St, Portland, OR 97215', 'Portland East', NULL, '2026-12-01 08:00:00', '2026-12-10 08:00:00'),
+-- Reservations with no Rental Agreements
+('Van', 'Val Smith', '5 Johnson Drive, New Brunswick, NJ 08818', 'Boston Fast Rental', 'cancelled', '2026-05-01 09:00:00', '2026-05-10 18:00:00'),
+('Offroad', 'Sophia Young', '99 Elm St, Portland, OR 97215', 'Portland East', NULL, '2026-11-01 08:00:00', '2026-11-10 08:00:00'),
+('Full-Size', 'Emma Davis', '12 Pine St, Boston, MA 02110', 'Portland East', NULL, '2026-06-01 09:00:00', '2026-06-03 09:00:00');
 
 INSERT INTO Rental_Agreement (
 Contract_Number, Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time, VIN,
