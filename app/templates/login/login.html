@@ -45,7 +45,7 @@
              <!-- Register -->
             <div class="tab-pane fade" id="register-pane" role="tabpanel">
                 <form method="post" action="/register" class="w-50 mx-auto mt-5 p-4 border rounded bg-white shadow-sm" id="register-form">
-                    <div id="login-error" class="alert alert-danager d-none"></div>
+                    <div id="login-error" class="alert alert-danger d-none"></div>
                     {% if request.query_params.get("password_mismatch") %}
                     <div class="alert alert-danger">Passwords do not match</div>
                     {% endif %}
