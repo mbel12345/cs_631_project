@@ -7,19 +7,63 @@ from app.auth.jwt import get_current_admin_user
 from app.database import get_db
 
 router = APIRouter()
-templates = Jinja2Templates(directory='app/templates/admin')
+templates = Jinja2Templates(directory='app/templates')
 
 @router.get('/admin/reservations')
-def reservation_page(request: Request):
+def reservation_page(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    reservations = db.execute(
+        text('''
+            SELECT
+                R.Customer_Name,
+                R.Pickup_Location_ID,
+                TO_CHAR(R.Pickup_Date_Time, 'YYYY-MM-DD HH24:MI') AS pickup_time,
+                TO_CHAR(R.Return_Date_Time, 'YYYY-MM-DD HH24:MI') AS return_time,
+                R.Customer_Address,
+                C.Contract_Number,
+                C.VIN,
+                TO_CHAR(C.Start_Date_Time, 'YYYY-MM-DD HH24:MI') AS start_time,
+                C.Start_Odometer_Reading,
+                TO_CHAR(C.End_Date_Time, 'YYYY-MM-DD HH24:MI') AS end_time,
+                C.End_Odometer_Reading,
+                C.License_State,
+                C.License_Number,
+                C.License_Expiry_Month,
+                C.License_Expiry_Year,
+                C.Credit_Card_Type,
+                C.Credit_Card_Number,
+                C.Credit_Card_Expiry_Month,
+                C.Credit_Card_Expiry_Year,
+                C.Total_Cost
+            FROM Reservation AS R
+            JOIN Rental_Agreement AS C ON
+                R.Customer_Name = C.Customer_Name AND
+                R.Customer_Address = C.Customer_Address AND
+                R.Pickup_Location_ID = C.Pickup_Location_ID AND
+                R.Pickup_Date_Time = C.Pickup_Date_Time
+            ORDER BY
+                R.Pickup_Date_Time DESC,
+                R.Customer_Name ASC
+        '''
+        )
+    ).fetchall()
+
+    reservations = [dict(r._mapping) for r in reservations]
 
     return templates.TemplateResponse(
-        'reservations.html',
+        'user/reservation_list.html',
         {
             'request': request,
+            'headers': reservations[0].keys() if len(reservations) > 0 else [],
+            'reservations': reservations,
         },
     )
 
-@router.get('/admin/user-list')
+@router.get('/admin/users')
 def users_list(
     request: Request,
     user = Depends(get_current_admin_user),
@@ -38,8 +82,9 @@ def users_list(
         '''
         )
     ).fetchall()
+
     return templates.TemplateResponse(
-        'user_list.html',
+        'admin/user_list.html',
         {
             'request': request,
             'users': users,
