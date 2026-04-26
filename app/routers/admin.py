@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from typing import Optional
 from uuid import uuid4
 
 from app.auth.jwt import get_current_admin_user
@@ -249,12 +250,32 @@ async def new_rental(
 @router.get('/admin/reservations')
 def reservation_page(
     request: Request,
+    customer: Optional[str] = None,
+    location: Optional[str] = None,
+    pickup_start: Optional[str] = None,
+    pickup_end: Optional[str] = None,
     user = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
 
+    conditions = [
+        '1 = 1',
+    ]
+
+    if customer and customer.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(R.Customer_Name) LIKE '%{customer.lower()}%'")
+
+    if location and location.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(R.Pickup_Location_ID) LIKE '%{location.lower()}%'")
+
+    if pickup_start and pickup_start.lower() not in ('none', 'null', ''):
+        conditions.append(f"R.Pickup_Date_Time >= '{pickup_start}'")
+
+    if pickup_end and pickup_end.lower() not in ('none', 'null', ''):
+        conditions.append(f"R.Pickup_Date_Time <= '{pickup_end}'")
+
     reservations = db.execute(
-        text('''
+        text(f'''
             SELECT
                 R.Customer_Name,
                 R.Pickup_Location_ID,
@@ -282,6 +303,8 @@ def reservation_page(
                 R.Customer_Address = C.Customer_Address AND
                 R.Pickup_Location_ID = C.Pickup_Location_ID AND
                 R.Pickup_Date_Time = C.Pickup_Date_Time
+            WHERE
+                {' AND '.join(conditions)}
             ORDER BY
                 R.Pickup_Date_Time DESC,
                 R.Customer_Name ASC
