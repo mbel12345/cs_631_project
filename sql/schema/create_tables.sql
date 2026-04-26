@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Rental_Agreement;
 DROP TABLE IF EXISTS Reservation;
 DROP TABLE IF EXISTS Customer;
@@ -92,6 +93,17 @@ CREATE TABLE Rental_Agreement (
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (VIN) REFERENCES Car(VIN)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE Users (
+    Username VARCHAR(100) PRIMARY KEY,
+    Password VARCHAR(200) NOT NULL,
+    Is_Admin BOOLEAN NOT NULL DEFAULT FALSE,
+    Customer_Name VARCHAR(100) NOT NULL,
+    Customer_Address VARCHAR(200) NOT NULL,
+    FOREIGN KEY (Customer_Name, Customer_Address) REFERENCES Customer(Customer_Name, Customer_Address)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );

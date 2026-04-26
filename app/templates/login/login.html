@@ -2,20 +2,132 @@
 <html>
 <head>
     <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
-    <h2>Login</h2>
+    <div class="w-50 mx-auto p-4 border rounded bg-white shadow-sm">
 
-    <form method="post" action="/auth/login">
-        <label>Email:</label><br>
-        <input type="text" name="username"><br><br>
+        <!-- Tab headers -->
+        <ul class="nav nav-tabs mb-4" id="auth-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="login-tab-header" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">Login</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="register-tab-header" data-bs-toggle="tab" data-bs-target="#register-pane" type="button" role="tab">Register</button>
+            </li>
+        </ul>
 
-        <label>Password:</label><br>
-        <input type="password" name="password"><br><br>
+        <!-- Tab content -->
+        <div class="tab-content">
 
-        <button type="submit">Login</button>
-    </form>
+            <!-- Login -->
+            <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
+                <form method="post" action="/login" class="w-50 mx-auto mt-5 p-4 border rounded bg-white shadow-sm">
+                    {% if request.query_params.get("registered") %}
+                    <div class="alert alert-success">Registration successful</div>
+                    {% endif %}
+                    {% if request.query_params.get("bad-login") %}
+                    <div class="alert alert-danger">Invalid username/password</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input name="login-username" type="text" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input name="login-password" type="password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
 
+             <!-- Register -->
+            <div class="tab-pane fade" id="register-pane" role="tabpanel">
+                <form method="post" action="/register" class="w-50 mx-auto mt-5 p-4 border rounded bg-white shadow-sm" id="register-form">
+                    <div id="login-error" class="alert alert-danager d-none"></div>
+                    {% if request.query_params.get("password_mismatch") %}
+                    <div class="alert alert-danger">Passwords do not match</div>
+                    {% endif %}
+                    {% if request.query_params.get("exists") %}
+                    <div class="alert alert-danger">User already exists.</div>
+                    {% endif %}
+                    {% if request.query_params.get("error") %}
+                    <div class="alert alert-danager">Registration failed. Please try again.</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input name="username" type="text" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input name="first_name" type="text" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input name="last_name" type="text" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <input name="address" type="text" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input name="password" type="password" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input name="confirm_password" type="password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    // Switch to Register tab if there were any registration errors, and show message
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has("password_mismatch") ||
+        params.has("exists") ||
+        params.has("error")) {
+
+        const registerTab = document.querySelector("#register-tab-header");
+        const tab = new bootstrap.Tab(registerTab);
+        tab.show();
+    }
+</script>
+
+<script>
+
+    // Validate that no registration fields are empty
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+        const username = document.querySelector("input[name='username']").value.trim();
+        const first_name = document.querySelector("input[name='first_name']").value.trim();
+        const last_name = document.querySelector("input[name='last_name']").value.trim();
+        const address = document.querySelector("input[name='address']").value.trim();
+        const password = document.querySelector("input[name='password']").value.trim();
+        const confirm_password = document.querySelector("input[name='confirm_password']").value.trim();
+        if (
+            !username ||
+            !first_name ||
+            !last_name ||
+            !address ||
+            !password ||
+            !confirm_password
+        ) {
+            e.preventDefault();
+            const errorBox = document.getElementById("login-error");
+            errorBox.textContent = "Please fill in all fields";
+            errorBox.classList.remove("d-none");
+        }
+    });
+</script>
+
 </html>

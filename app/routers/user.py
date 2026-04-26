@@ -3,6 +3,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.jwt import get_current_user
 from app.database import get_db
 
 router = APIRouter()
@@ -21,5 +22,19 @@ def reservation_page(
         {
             'request': request,
             'locations': locations,
+        },
+    )
+
+@router.get('/user/new-reservation')
+def new_reservation(
+    request: Request,
+    user = Depends(get_current_user)
+):
+
+    return templates.TemplateResponse(
+        'new_reservation.html',
+        {
+            'request': request,
+            'customer_name': user['customer_name'],
         },
     )
