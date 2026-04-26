@@ -38,3 +38,18 @@ def new_reservation(
             'customer_name': user['customer_name'],
         },
     )
+
+@router.get('/user/info')
+def new_reservation(
+    request: Request,
+    user = Depends(get_current_user)
+):
+
+    print(user)
+    return templates.TemplateResponse(
+        'user_info.html',
+        {
+            'request': request,
+            'user': user,
+        },
+    )

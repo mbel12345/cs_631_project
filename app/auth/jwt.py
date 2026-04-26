@@ -63,7 +63,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
 
     # Load user from DB
     result = db.execute(
-        text('SELECT username, customer_name FROM Users WHERE username = :username'),
+        text('SELECT username, customer_name, customer_address FROM Users WHERE username = :username'),
         {'username': username}
     ).fetchone()
 
