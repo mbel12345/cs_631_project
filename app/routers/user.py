@@ -45,7 +45,6 @@ def new_reservation(
     user = Depends(get_current_user)
 ):
 
-    print(user)
     return templates.TemplateResponse(
         'user_info.html',
         {
