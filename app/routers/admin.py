@@ -298,7 +298,7 @@ def reservation_page(
                 C.Credit_Card_Expiry_Year,
                 C.Total_Cost
             FROM Reservation AS R
-            JOIN Rental_Agreement AS C ON
+            LEFT JOIN Rental_Agreement AS C ON
                 R.Customer_Name = C.Customer_Name AND
                 R.Customer_Address = C.Customer_Address AND
                 R.Pickup_Location_ID = C.Pickup_Location_ID AND
