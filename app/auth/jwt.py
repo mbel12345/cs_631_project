@@ -63,8 +63,19 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
 
     # Load user from DB
     result = db.execute(
-        text('SELECT username, customer_name, customer_address FROM Users WHERE username = :username'),
-        {'username': username}
+        text('''
+            SELECT
+                username,
+                split_part(customer_name, ' ', 1) AS first_name,
+                split_part(customer_name, ' ', 2) AS last_name,
+                customer_address AS address
+            FROM Users
+            WHERE username = :username
+        '''
+        ),
+        {
+            'username': username,
+        },
     ).fetchone()
 
     if result is None:
