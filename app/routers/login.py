@@ -42,8 +42,9 @@ async def login(request: Request, db: Session = Depends(get_db)):
 
     user = dict(user._mapping)
 
+    redirect_location = '/admin/reservations' if user['is_admin'] is True else '/user/new-reservation'
     access_token = create_token(user['username'])
-    response = RedirectResponse('/user/new-reservation', status_code=303)
+    response = RedirectResponse(redirect_location, status_code=303)
     response.set_cookie(
         key='access_token',
         value=access_token,

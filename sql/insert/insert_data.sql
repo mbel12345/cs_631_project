@@ -85,7 +85,8 @@ INSERT INTO Customer (Customer_Name, Customer_Address) VALUES
 ('Noah Wilson', '33 Maple St, Dallas, TX 75002'),
 ('Olivia Clark', '44 Cedar St, Phoenix, AZ 85002'),
 ('Ethan Hall', '66 Birch St, Atlanta, GA 30304'),
-('Sophia Young', '99 Elm St, Portland, OR 97215');
+('Sophia Young', '99 Elm St, Portland, OR 97215'),
+('John Admin', '200 Northwest Ave, Los Angeles, CA 90000');
 
 
 INSERT INTO Reservation (Class_Name, Customer_Name, Customer_Address, Pickup_Location_ID, Status_, Pickup_Date_Time, Return_Date_Time) VALUES
@@ -153,3 +154,15 @@ Credit_Card_Type, Credit_Card_Number, Credit_Card_Expiry_Month, Credit_Card_Expi
 
 ('A00014','Sophia Young','99 Elm St, Portland, OR 97215','Portland East','2026-12-01 08:00:00','11234567894',
  '2026-12-01 08:00:00',4000,'2026-12-10 08:00:00',5000,'OR','K9999999999',10,2029,'Visa Credit','1200000000000009',10,2030,700);
+
+
+INSERT INTO Users (Username, Password, Is_Admin, Customer_Name, Customer_Address) VALUES
+('jsmith1', 'pass', false, 'John Smith', '1 North Street, Albany, NY 01555'),
+('jsmith2', 'pass', false, 'John Smith', '2 South Street, Buffalo, NY 01555'),
+('kjones', 'pass', false, 'Kelly Jones', '3 Main Street, Omaha, NE 04555'),
+('vsmith', 'pass', false, 'Val Smith', '5 Johnson Drive, New Brunswick, NJ 08818'),
+('pmiles', 'pass', false, 'Peter Miles', '10 River Rd, Trenton, NJ 08810'),
+('mlopez', 'pass', false, 'Maria Lopez', '22 Palm Ave, Miami, FL 33101'),
+('cwu', 'pass', false, 'Chen Wu', '88 Market St, San Francisco, CA 94103'),
+('apatel', 'pass', false, 'Ava Patel', '55 Garden St, Chicago, IL 60610'),
+('jadmin', 'pass', true, 'John Admin', '200 Northwest Ave, Los Angeles, CA 90000');

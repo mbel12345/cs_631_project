@@ -68,7 +68,8 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
                 username,
                 split_part(customer_name, ' ', 1) AS first_name,
                 split_part(customer_name, ' ', 2) AS last_name,
-                customer_address AS address
+                customer_address AS address,
+                is_admin
             FROM Users
             WHERE username = :username
         '''
@@ -82,3 +83,17 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail='User not found')
 
     return dict(result._mapping)
+
+def get_current_admin_user(request: Request, db: Session = Depends(get_db)):
+
+    '''
+    Get current user from the token and validate it.
+    Fail if this user is not an admin.
+    This dependency will be used by all the admin API calls.
+    '''
+
+    user = get_current_user(request, db)
+    if user['is_admin'] is not True:
+        raise HTTPException(status_code=401, detail='User is not an admin')
+
+    return user
