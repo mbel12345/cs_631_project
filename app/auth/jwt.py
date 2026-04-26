@@ -2,7 +2,7 @@ import secrets
 import uuid
 
 from datetime import datetime, timedelta, timezone
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Request
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy import text
@@ -38,10 +38,7 @@ def create_token(user_id: Union[str, uuid.UUID]) -> str:
     try:
         return jwt.encode(to_encode, secret, algorithm=settings.ALGORITHM)
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f'Could not create token: {str(e)}'
-        )
+        raise AuthError(f'Could not create token: {str(e)}')
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
 
@@ -50,16 +47,16 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get('access_token')
 
     if not token:
-        raise HTTPException(status_code=401, detail='Not authenticated')
+        raise AuthError('Not authenticated')
 
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
         username = payload.get('sub')
     except JWTError:
-        raise HTTPException(status_code=401, detail='Invalid token')
+        raise AuthError('Invalid token')
 
     if not username:
-        raise HTTPException(status_code=401, detail='Invalid token payload')
+        raise AuthError('Invalid token payload')
 
     # Load user from DB
     result = db.execute(
@@ -80,9 +77,11 @@ def get_current_user(request: Request, db: Session = Depends(get_db)):
     ).fetchone()
 
     if result is None:
-        raise HTTPException(status_code=401, detail='User not found')
+        raise AuthError('User not found')
 
-    return dict(result._mapping)
+    result = dict(result._mapping)
+    print('get_current_user result:', result)
+    return result
 
 def get_current_admin_user(request: Request, db: Session = Depends(get_db)):
 
@@ -94,6 +93,23 @@ def get_current_admin_user(request: Request, db: Session = Depends(get_db)):
 
     user = get_current_user(request, db)
     if user['is_admin'] is not True:
-        raise HTTPException(status_code=401, detail='User is not an admin')
+        raise AuthError('User is not admin')
 
     return user
+
+def get_current_user_optional(request: Request, db: Session = Depends(get_db)):
+
+    '''
+    Get current user from the token and validate it.
+    Return None if this fails.
+    This is useful to allow the user to see the home page without being logged in.
+    '''
+
+    try:
+        return get_current_user(request, db)
+    except AuthError as e:
+        return None
+
+class AuthError(Exception):
+
+    pass

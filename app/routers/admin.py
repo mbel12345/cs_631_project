@@ -9,6 +9,19 @@ from app.database import get_db
 router = APIRouter()
 templates = Jinja2Templates(directory='app/templates')
 
+@router.get('/admin/home')
+def home(
+    request: Request,
+    user = Depends(get_current_admin_user),
+):
+
+    return templates.TemplateResponse(
+        'admin/index.html',
+        {
+            'request': request,
+        },
+    )
+
 @router.get('/admin/reservations')
 def reservation_page(
     request: Request,

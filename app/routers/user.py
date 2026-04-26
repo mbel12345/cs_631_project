@@ -3,11 +3,27 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.jwt import AuthError
 from app.auth.jwt import get_current_user
+from app.auth.jwt import get_current_user_optional
 from app.database import get_db
 
 router = APIRouter()
-templates = Jinja2Templates(directory='app/templates/user')
+templates = Jinja2Templates(directory='app/templates')
+
+@router.get('/user/home')
+def home(
+    request: Request,
+    user = Depends(get_current_user_optional),
+):
+
+    return templates.TemplateResponse(
+        'user/index.html',
+        {
+            'request': request,
+            'user': user['first_name'] if user is not None else None,
+        },
+    )
 
 @router.get('/user/reservations')
 def reservation_page(
@@ -18,7 +34,7 @@ def reservation_page(
     locations = db.execute(text('SELECT Location_ID, Address FROM Location ORDER BY Location_ID ASC')).mappings().all()
 
     return templates.TemplateResponse(
-        'reservations.html',
+        'user/reservations.html',
         {
             'request': request,
             'locations': locations,
@@ -32,7 +48,7 @@ def new_reservation(
 ):
 
     return templates.TemplateResponse(
-        'new_reservation.html',
+        'user/new_reservation.html',
         {
             'request': request,
             'first_name': user['first_name'],
@@ -47,7 +63,7 @@ def new_reservation(
 ):
 
     return templates.TemplateResponse(
-        'user_info.html',
+        '/user/user_info.html',
         {
             'request': request,
             'user': user,
