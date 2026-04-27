@@ -18,11 +18,12 @@
             <a href="/admin/new-reservation">New-Reservation</a>
             <a href="/admin/new-rental">New-Rental</a>
             <a href="/admin/reservations">Reservations</a>
+            <a href="/admin/users">Users</a>
             {% if user %}
                 <a href="/admin/info">Admin-Profile</a>
                 <a href="/logout">Logout</a>
                 <br/><br/>
-                <h4>Welcome, {{ first_name }} {{ last_name }}</h4> 
+                <h4>Welcome, {{ first_name }} {{ last_name }}</h4>
             {% else %}
                <a href="/login">Login/Register</a>
             {% endif %}
