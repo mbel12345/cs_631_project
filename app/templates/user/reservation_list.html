@@ -49,10 +49,7 @@
 
         <!-- Search buttons -->
         <div class="row search-row g-3 mb-4">
-            <div class="col-md-3 search-box">
-                <label class="form-label">Customer</label>
-                <input type="text" id="customer-search" class="form-control">
-            </div>
+            
             <div class="col-md-3 search-box">
                 <label class="form-label">Location</label>
                 <input type="text" id="location-search" class="form-control">
@@ -123,12 +120,11 @@
     document.getElementById("search-button").addEventListener("click", async () => {
 
         const params = new URLSearchParams({
-            customer: document.getElementById("customer-search").value.trim() || null,
             location: document.getElementById("location-search").value.trim() || null,
             pickup_start: document.getElementById("pickup-start-search").value.trim() || null,
             pickup_end: document.getElementById("pickup-end-search").value.trim() || null
         });
-        window.location.href = "/admin/reservations?" + params.toString();
+        window.location.href = "/user/reservations?" + params.toString();
     });
 
 </script>
