@@ -319,6 +319,10 @@ def reservation_page(
     ).fetchall()
 
     reservations = [dict(r._mapping) for r in reservations]
+    for row in reservations:
+        for col in row:
+            if row[col] is None:
+                row[col] = ''
 
     return templates.TemplateResponse(
         'admin/reservation_list.html',
