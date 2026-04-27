@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin - All Users</title>
-    <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends "admin/layout.html" %}
 
+{% block title %}Admin - All Users{% endblock %}
+
+{% block style %}
     <style>
 
         table {
@@ -36,9 +34,10 @@
             flex: 1;
         }
     </style>
+{% endblock %}
 
-</head>
-<body class="bg-light">
+{% block content %}
+
 
 <div class="container py-5">
 
@@ -95,8 +94,8 @@
     </div>
 </div>
 
-</body>
-
+{% endblock %}
+{% block script %}
 <script>
 
     document.getElementById("search-button").addEventListener("click", async () => {
@@ -111,5 +110,4 @@
     });
 
 </script>
-
-</html>
+{% endblock %}

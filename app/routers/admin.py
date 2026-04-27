@@ -25,7 +25,9 @@ def home(
         'admin/index.html',
         {
             'request': request,
-            'user': user['first_name'],
+            'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name']
         },
     )
 
@@ -75,10 +77,12 @@ def new_reservation_form(
     car_classes = [c[0] for c in car_classes]
 
     return templates.TemplateResponse(
-        'user/new_reservation.html',
+        'admin/new_reservation.html',
         {
             'request': request,
+            'user': user,
             'first_name': user['first_name'],
+            'last_name': user['last_name'],
             'customers': customers,
             'locations': locations,
             'car_classes': car_classes,
@@ -181,10 +185,12 @@ def new_rental_form(
     ).fetchall()
 
     return templates.TemplateResponse(
-        'user/new_rental.html',
+        'admin/new_rental.html',
         {
             'request': request,
+            'user': user,
             'first_name': user['first_name'],
+            'last_name': user['last_name'],
             'reservations': reservations,
             'cars': cars,
         },
@@ -315,9 +321,12 @@ def reservation_page(
     reservations = [dict(r._mapping) for r in reservations]
 
     return templates.TemplateResponse(
-        'user/reservation_list.html',
+        'admin/reservation_list.html',
         {
             'request': request,
+            'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
             'headers': reservations[0].keys() if len(reservations) > 0 else [],
             'reservations': reservations,
         },
@@ -370,6 +379,25 @@ def users_list(
         'admin/user_list.html',
         {
             'request': request,
+            'user': user,
             'users': users,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
+        },
+    )
+
+@router.get('/admin/info')
+def admin_info(
+    request: Request,
+    user = Depends(get_current_admin_user)
+):
+
+    return templates.TemplateResponse(
+        '/admin/user_info.html',
+        {
+            'request': request,
+            'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
         },
     )

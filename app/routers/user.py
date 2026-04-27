@@ -11,6 +11,24 @@ from app.database import get_db
 router = APIRouter()
 templates = Jinja2Templates(directory='app/templates')
 
+@router.get('/')
+def home_page(
+    request: Request,
+    user = Depends(get_current_user_optional),
+):
+
+    
+    return templates.TemplateResponse(
+        'user/index.html',
+        {
+            'request': request,
+            'user': user['first_name'] if user is not None else None,
+            'first_name': user['first_name'] if user is not None else None,
+            'last_name': user['last_name'] if user is not None else None
+        },
+    )
+
+
 @router.get('/user/home')
 def home(
     request: Request,
@@ -22,22 +40,28 @@ def home(
         {
             'request': request,
             'user': user['first_name'] if user is not None else None,
+            'first_name': user['first_name'] if user is not None else None,
+            'last_name': user['last_name'] if user is not None else None
         },
     )
 
 @router.get('/user/reservations')
 def reservation_page(
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
 ):
 
     locations = db.execute(text('SELECT Location_ID, Address FROM Location ORDER BY Location_ID ASC')).mappings().all()
 
     return templates.TemplateResponse(
-        'user/reservations.html',
+        'user/reservation_list.html',
         {
             'request': request,
+            'user': user,
             'locations': locations,
+            'first_name': user['first_name'],
+            'last_name': user['last_name']
         },
     )
 
@@ -51,13 +75,14 @@ def new_reservation(
         'user/new_reservation.html',
         {
             'request': request,
+            'user': user,
             'first_name': user['first_name'],
             'last_name': user['last_name'],
         },
     )
 
 @router.get('/user/info')
-def new_reservation(
+def user_info(
     request: Request,
     user = Depends(get_current_user)
 ):
@@ -67,5 +92,7 @@ def new_reservation(
         {
             'request': request,
             'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
         },
     )
