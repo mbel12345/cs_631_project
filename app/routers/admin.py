@@ -401,3 +401,50 @@ def admin_info(
             'last_name': user['last_name'],
         },
     )
+
+@router.post('/admin/delete-reservation')
+async def delete_reservation(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    data = await request.json()
+    customer_name = data['customer_name'].strip()
+    customer_address = data['customer_address'].strip()
+    pickup_location_id = data['pickup_location_id'].strip()
+    pickup_time = data['pickup_time'].strip() + ':00'
+
+    query = f'''
+        DELETE FROM Rental_Agreement
+        WHERE
+            Customer_Name = '{customer_name}' AND
+            Customer_Address = '{customer_address}' AND
+            Pickup_Location_ID = '{pickup_location_id}' AND
+            Pickup_Date_Time = '{pickup_time}'
+    '''
+    print(query)
+
+    result = db.execute(text(query))
+    db.commit()
+
+    deleted_rows = result.rowcount
+    print('Deleted rentals:', deleted_rows)
+
+    query = f'''
+        DELETE FROM Reservation
+        WHERE
+            Customer_Name = '{customer_name}' AND
+            Customer_Address = '{customer_address}' AND
+            Pickup_Location_ID = '{pickup_location_id}' AND
+            Pickup_Date_Time = '{pickup_time}'
+    '''
+    print(query)
+
+    result = db.execute(text(query))
+    db.commit()
+
+    deleted_rows = result.rowcount
+    print('Deleted reservations:', deleted_rows)
+    if deleted_rows != 1:
+        raise ValueError(f'Expected 1 reservation to be deleted')
