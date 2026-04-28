@@ -80,7 +80,9 @@
                             {% for header in headers %}
                                 <th>{{ header.replace("_", " ") | title }}</th>
                             {% endfor %}
-                            <th>Delete</th>
+                            {% if reservations %}
+                                <th>Delete</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -89,7 +91,9 @@
                             {% for value in reservation.values() %}
                                 <td>{{ value }}</td>
                             {% endfor %}
-                            <td><button id="delete-button-{{ loop.index }}" class="btn btn-danger">Delete</button></td>
+                             {% if reservations %}
+                                <td><button id="delete-button-{{ loop.index }}" class="btn btn-danger">Delete</button></td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
