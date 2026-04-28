@@ -95,6 +95,10 @@ def reservation_page(
     ).fetchall()
 
     reservations = [dict(r._mapping) for r in reservations]
+    for row in reservations:
+        for col in row:
+            if row[col] is None:
+                row[col] = ''
 
     return templates.TemplateResponse(
         'user/reservation_list.html',
@@ -107,6 +111,38 @@ def reservation_page(
             'reservations': reservations,
         },
     )
+
+@router.post('/user/delete-reservation')
+async def delete_reservation(
+    request: Request,
+    user = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+
+    data = await request.json()
+    customer_name = data['customer_name'].strip()
+    customer_address = data['customer_address'].strip()
+    pickup_location_id = data['pickup_location_id'].strip()
+    pickup_time = data['pickup_time'].strip() + ':00'
+
+    query = f'''
+        DELETE FROM Reservation
+        WHERE
+            Customer_Name = '{customer_name}' AND
+            Customer_Address = '{customer_address}' AND
+            Pickup_Location_ID = '{pickup_location_id}' AND
+            Pickup_Date_Time = '{pickup_time}'
+    '''
+    print(query)
+
+    result = db.execute(text(query))
+    db.commit()
+
+    deleted_rows = result.rowcount
+    print('Deleted reservations:', deleted_rows)
+    if deleted_rows != 1:
+        raise ValueError(f'Expected 1 reservation to be deleted')
+
 
 @router.get('/user/new-reservation')
 def new_user_reservation_form(
@@ -161,8 +197,8 @@ async def new_user_reservation(
 
     form = await request.form()
    
-    customer_name = user['customer_name'].strip()
-    customer_address = user['address'].strip()
+    customer_name = user['customer_name']
+    customer_address = user['address']
     pickup_location_id = (form['pickup_location_id'].split('~')[0]).strip()
     class_name = form['class_name'].strip()
     pickup_date_time = form['pickup_date_time'].strip()

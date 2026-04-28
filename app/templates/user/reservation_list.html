@@ -77,6 +77,9 @@
                             {% for header in headers %}
                                 <th>{{ header.replace("_", " ") | title }}</th>
                             {% endfor %}
+                             {% if reservations %}
+                                <th>Delete</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -85,6 +88,9 @@
                             {% for value in reservation.values() %}
                                 <td>{{ value }}</td>
                             {% endfor %}
+                            {% if reservations %}
+                                <td><button id="delete-button-{{ loop.index }}" class="btn btn-danger">Delete</button></td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -126,6 +132,52 @@
         });
         window.location.href = "/user/reservations?" + params.toString();
     });
+
+</script>
+
+<script>
+
+document.querySelectorAll(".btn-danger").forEach(btn => {
+    btn.addEventListener("click", async () => {
+
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td");
+
+        const customer_name = cells[0].textContent;
+        const customer_address = cells[4].textContent;
+        const pickup_location_id = cells[1].textContent;
+        const pickup_time = cells[2].textContent;
+
+        const payload = {
+            "customer_name": customer_name,
+            "customer_address": customer_address,
+            "pickup_location_id": pickup_location_id,
+            "pickup_time": pickup_time,
+        }
+
+        console.log(payload);
+
+        try {
+            const response = await fetch("/user/delete-reservation", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete reservation');
+            }
+
+            // Redirect after delete
+            window.location.href = "/user/reservations";
+
+        } catch (err) {
+            console.error("Delete failed:", err);
+        }
+    });
+});
 
 </script>
 
