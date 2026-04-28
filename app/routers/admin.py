@@ -15,6 +15,148 @@ from app.database import get_db
 router = APIRouter()
 templates = Jinja2Templates(directory='app/templates')
 
+QUERIES = {
+    "1": {
+        "label": "NY customers having Multiple Reservations",
+        "sql": """
+            SELECT
+                R.Customer_Name,
+                R.Customer_Address,
+                R.Pickup_Location_ID,
+                COUNT(*)
+            FROM Reservation AS R
+            GROUP BY R.Customer_Name, R.Customer_Address, R.Pickup_Location_ID
+            HAVING COUNT(*) > 1
+            AND R.Customer_Address LIKE '%,%NY%'
+
+        """,
+    },
+    "2": {
+        "label": "Rank the cars by number of rentals",
+        "sql": """
+            SELECT
+                M.Car_Class,
+                COUNT(*) AS Rentals
+            FROM rental_agreement AS A
+            JOIN car AS C ON C.VIN = A.VIN
+            JOIN car_model AS M ON M.Model_ID = C.Model_ID
+            GROUP BY M.Car_Class
+            ORDER BY COUNT(*) DESC, M.Car_Class ASC
+
+        """,
+    },
+    "3": {
+        "label": "Show all reservations that do not have a rental agreement",
+        
+        "sql": """
+            SELECT
+                R.*,
+                A.Contract_Number
+            FROM reservation AS R
+            LEFT OUTER JOIN rental_agreement AS A ON
+                A.Customer_Name = R.Customer_Name AND
+                A.Customer_Address = R.Customer_Address AND
+                A.Pickup_Location_ID = R.Pickup_Location_ID AND
+                A.Pickup_Date_Time = R.Pickup_Date_Time
+            WHERE
+                A.Contract_Number IS NULL;
+
+
+        """,
+    },
+    "4": {
+        "label": "Select cars that have never been rented",
+        "sql": """
+            SELECT C.VIN
+                FROM Car C
+                WHERE NOT EXISTS (
+                    SELECT *
+                    FROM Rental_Agreement RA
+                    WHERE RA.VIN = C.VIN
+                );
+
+
+        """,
+    },
+    "5": {
+        "label": "Find customers whose reservation are all in ‘pending’ status",
+        "sql": """
+            SELECT DISTINCT R.Customer_Name, R.Customer_Address
+            FROM Reservation R
+            WHERE NOT EXISTS (
+                SELECT *
+                FROM Reservation R2
+                WHERE R2.Customer_Name = R.Customer_Name
+                AND R2.Customer_Address = R.Customer_Address
+                AND (R2.Status_ IS NULL OR R2.Status_ <> 'pending')
+            );
+
+
+        """,
+    },
+    "6": {
+        "label": "Find Customers who have never rented from Boston",
+        "sql": """
+            SELECT CU.Customer_Name, CU.Customer_Address
+            FROM Customer CU
+            WHERE NOT EXISTS (
+                SELECT *
+                FROM Rental_Agreement RA
+                WHERE RA.Customer_Name = CU.Customer_Name
+                AND RA.Customer_Address = CU.Customer_Address
+                AND RA.Pickup_Location_ID = 'Boston Fast Rental'
+            );
+
+
+        """,
+    },
+    "7": {
+        "label": "Find Customers who have rented every car at a location",
+        "sql": """
+            SELECT DISTINCT RA.Customer_Name, RA.Customer_Address
+            FROM Rental_Agreement RA
+            WHERE NOT EXISTS (
+                SELECT *
+                FROM Car C
+                WHERE C.Location_ID = RA.Pickup_Location_ID
+                AND NOT EXISTS (
+                    SELECT *
+                    FROM Rental_Agreement RA2
+                    WHERE RA2.Customer_Name = RA.Customer_Name
+                        AND RA2.Customer_Address = RA.Customer_Address
+                        AND RA2.VIN = C.VIN
+                )
+            );
+
+
+        """,
+    },
+    
+    "8": {
+        "label": "Find Customers whose every reservation was eventually turned into a rental agreement",
+        "sql": """
+            SELECT DISTINCT R.Customer_Name, R.Customer_Address
+            FROM Reservation R
+            WHERE NOT EXISTS (
+                SELECT *
+                FROM Reservation R2
+                WHERE R2.Customer_Name = R.Customer_Name
+                AND R2.Customer_Address = R.Customer_Address
+                AND NOT EXISTS (
+                    SELECT *
+                    FROM Rental_Agreement RA
+                    WHERE RA.Customer_Name = R2.Customer_Name
+                        AND RA.Customer_Address = R2.Customer_Address
+                        AND RA.Pickup_Date_Time = R2.Pickup_Date_Time
+                )
+            );
+
+
+
+        """,
+    },
+}
+
 @router.get('/admin/home')
 def home(
     request: Request,
@@ -452,3 +594,35 @@ async def delete_reservation(
     print('Deleted reservations:', deleted_rows)
     if deleted_rows != 1:
         raise ValueError(f'Expected 1 reservation to be deleted')
+
+
+@router.get('/admin/queries')
+def admin_queries_get(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+    queryid: Optional[str] = None,
+):
+    results = {}
+    if queryid and queryid not in ('none', 'null', ''):
+       query  = QUERIES[queryid]["sql"]
+       print(query)
+       results = db.execute(text(query)).fetchall()
+       results = [dict(r._mapping) for r in results]
+       for row in results:
+            for col in row:
+                if row[col] is None:
+                    row[col] = ''
+    
+
+    return templates.TemplateResponse(
+        'admin/queries.html',
+        {
+            'request': request,
+            'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
+             'results': results,
+            
+        },
+    )

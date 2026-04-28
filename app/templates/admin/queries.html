@@ -1,0 +1,68 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Admin Queries{% endblock %}
+
+{% block content %}
+
+    <div class="wide-container py-4">
+        <h2 class="mb-4">All Queries</h2>
+
+        <!-- Search buttons -->
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button type="submit" id="search-button" value = "1" class="form-control btn btn-primary w-100">NY customers having Multiple Reservations</button>
+            <button type="submit" id="search-button" value = "2" class="form-control btn btn-primary w-100">Rank the car class by number of rental</button>
+            <button type="submit" id="search-button" value = "3" class="form-control btn btn-primary w-100">Show reservations without rental agreement</button>
+            <button type="submit" id="search-button" value = "4" class="form-control btn btn-primary w-100">Cars that have never been rented</button>
+            <button type="submit" id="search-button" value = "5" class="form-control btn btn-primary w-100">Customers with PENDING reservation</button>
+            <button type="submit" id="search-button" value = "6" class="form-control btn btn-primary w-100">Customers who never rented from Boston</button>
+            <button type="submit" id="search-button" value = "7" class="form-control btn btn-primary w-100">Customers who have rented every car at a location</button>
+            <button type="submit" id="search-button" value = "8" class="form-control btn btn-primary w-100">Customers whose all reservation were turned into a rental</button>
+        </div> 
+        
+        <br/>
+        <br/>
+        <!-- Main table -->
+        <div class="p-0">
+            {% if results %}
+                <h2 class="mb-4">Results</h2>
+            {% endif %}
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered mb-0">
+                    
+                    <tbody>
+                        {% for results in results %}
+                        <tr>
+                            {% for value in results.values() %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    const buttons = document.querySelectorAll('.btn-primary');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // e.target refers to the specific button that was clicked
+             const params = new URLSearchParams({
+                queryid : e.target.value
+                
+             });
+             window.location.href = "/admin/queries?" + params.toString();
+        });
+        
+    }); 
+    
+ 
+</script>
+{% endblock %}
