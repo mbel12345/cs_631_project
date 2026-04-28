@@ -8,24 +8,51 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+    /* 1. Set Blue Background and Center Content */
+    .navbar {
+        background-color: #007bff; /* Blue color */
+        display: flex;
+        justify-content: center; /* Centers items horizontally */
+        padding: 1rem;
+    }
+
+    .navbar ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px; /* Space between links */
+    }
+
+    .navbar a {
+        text-decoration: none;
+        color: white; /* Contrast color */
+        font-family: sans-serif;
+        font-weight: bold;
+    }
+    </style>
     {% block style %}{% endblock %}
 </head>
 <body>
     <header>
         <h1>Car Rental App</h1>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/user/new-reservation">New-Reservation</a>
-            <a href="/user/reservations">Reservations</a>
+        <nav class="navbar">
+            <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/user/new-reservation">New-Reservation</a></li>
+            <li><a href="/user/reservations">Reservations</a></li>
             {% if user %}
-                <a href="/user/info">User-Profile</a>
-                <a href="/logout">Logout</a>
-                <br/><br/>
-                <h4>Welcome, {{ first_name }} {{ last_name }}</h4> 
+                <li><a href="/user/info">User-Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+               
             {% else %}
-               <a href="/login">Login/Register</a>
+               <li><a href="/login">Login/Register</a></li>
             {% endif %}
+            </ul>
         </nav>
+        <br/><br/>
+        {% if user %}<h4>Welcome, {{ first_name }} {{ last_name }}</h4> {% endif %}
     </header>
 
     <main>
