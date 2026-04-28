@@ -32,27 +32,29 @@
         font-weight: bold;
     }
     </style>
-    {% block style %}<br/>{% endblock %}
+    {% block style %}{% endblock %}
 </head>
 <body>
     <header>
         <h1>Car Rental App Admin View</h1>
-        <nav>
-            <a href="/admin/home">Home</a>
-            <a href="/admin/new-reservation">New-Reservation</a>
-            <a href="/admin/new-rental">New-Rental</a>
-            <a href="/admin/reservations">Reservations</a>
-            <a href="/admin/users">Users</a>
-            <a href="/admin/queries">Queries</a>
+        <nav class="navbar">
+            <ul><li><a href="/admin/home">Home</a></li>
+            <li><a href="/admin/new-reservation">New-Reservation</a></li>
+            <li><a href="/admin/new-rental">New-Rental</a></li>
+            <li><a href="/admin/reservations">Reservations</a></li>
+            <li><a href="/admin/users">Users</a></li>
+            <li><a href="/admin/queries">Queries</a></li>
             {% if user %}
-                <a href="/admin/info">Admin-Profile</a>
-                <a href="/logout">Logout</a>
-                <br/><br/>
-                <h4>Welcome, {{ first_name }} {{ last_name }}</h4>
+                <li><a href="/admin/info">Admin-Profile</a></li>
+                <li><a href="/logout">Logout</a></li>
+                
             {% else %}
-               <a href="/login">Login/Register</a>
+               <li><a href="/login">Login/Register</a></li>
             {% endif %}
+            </ul>
         </nav>
+        <br/><br/>
+        {% if user %}<h4>Welcome, {{ first_name }} {{ last_name }}</h4> {% endif %}
     </header>
 
     <main>
