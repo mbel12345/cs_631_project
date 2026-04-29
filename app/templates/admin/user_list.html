@@ -77,6 +77,7 @@
                     <th>Address</th>
                     <th>Username</th>
                     <th>Admin?</th>
+                    <th>Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,6 +88,7 @@
                     <td>{{ user.address }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.is_admin }}</td>
+                    <td><button id="delete-button-{{ loop.index }}" class="btn btn-danger">Delete</button></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -110,4 +112,49 @@
     });
 
 </script>
+
+<script>
+
+document.querySelectorAll(".btn-danger").forEach(btn => {
+    btn.addEventListener("click", async () => {
+
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td");
+
+        const username = cells[3].textContent;
+
+        const payload = {
+            "username": username,
+        }
+
+        console.log(payload);
+
+        try {
+            const response = await fetch("/admin/delete-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                alert(data.detail);
+                return;
+            }
+
+            alert('User was deleted');
+
+            // Redirect after delete
+            window.location.href = "/admin/users";
+
+        } catch (err) {
+            alert('Failed to delete user (internal error)');
+        }
+    });
+});
+
+</script>
+
 {% endblock %}

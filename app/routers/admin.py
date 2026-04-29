@@ -693,6 +693,32 @@ async def delete_car(
     if deleted_rows != 1:
         raise ValueError(f'Expected 1 car to be deleted')
 
+@router.post('/admin/delete-user')
+async def delete_user(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    '''
+    Remove user account from system, but keep the Customer record since it may be in use by Reservations.
+    This is useful if the user requests their account to be deactivated.
+    '''
+
+    data = await request.json()
+    username = data['username'].strip()
+
+    delete_query = 'DELETE FROM Users WHERE LOWER(Username) = :username'
+    print(delete_query)
+    delete_result = db.execute(text(delete_query), {'username': username})
+    db.commit()
+
+    deleted_rows = delete_result.rowcount
+    print('Deleted users:', deleted_rows)
+
+    if deleted_rows != 1:
+        raise ValueError(f'Expected 1 user to be deleted')
+
 @router.get('/admin/queries')
 def admin_queries_get(
     request: Request,
