@@ -1,6 +1,6 @@
 import traceback
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
@@ -47,7 +47,7 @@ QUERIES = {
     },
     "3": {
         "label": "Show all reservations that do not have a rental agreement",
-        
+
         "sql": """
             SELECT
                 R.*,
@@ -131,7 +131,7 @@ QUERIES = {
 
         """,
     },
-    
+
     "8": {
         "label": "Find Customers whose every reservation was eventually turned into a rental agreement",
         "sql": """
@@ -478,6 +478,77 @@ def reservation_page(
         },
     )
 
+@router.get('/admin/cars')
+def car_page(
+    request: Request,
+    vin: Optional[str] = None,
+    location: Optional[str] = None,
+    car_class: Optional[str] = None,
+    make: Optional[str] = None,
+    model: Optional[str] = None,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    conditions = [
+        '1 = 1',
+    ]
+
+    if vin and vin.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(Car.VIN) LIKE '%{vin.lower()}%'")
+
+    if location and location.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(Car.Location_ID) LIKE '%{location.lower()}%'")
+
+    if car_class and car_class.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(Car_Class.Class_Name) LIKE '%{car_class.lower()}%'")
+
+    if make and make.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(Car_Model.Make) LIKE '%{make.lower()}%'")
+
+    if model and model.lower() not in ('none', 'null', ''):
+        conditions.append(f"LOWER(Car_model.Model) LIKE '%{model.lower()}%'")
+
+    result = db.execute(
+        text(f'''
+            SELECT
+                Car.VIN,
+                Car.Location_ID,
+                Car_Class.Class_Name,
+                Car_Model.Make,
+                Car_Model.Model,
+                Car_Model.Year_,
+                Car_Class.Daily_Rate,
+                Car_Class.Weekly_Rate
+            FROM Car
+            JOIN Car_Model ON Car_Model.Model_ID = Car.Model_ID
+            JOIN Car_Class ON Car_Class.Class_Name = Car_Model.Car_Class
+            WHERE
+                {' AND '.join(conditions)}
+            ORDER BY
+                Car.VIN ASC
+        '''
+        )
+    ).fetchall()
+
+    cars = [dict(row._mapping) for row in result]
+    for row in cars:
+        for col in row:
+            if row[col] is None:
+                row[col] = ''
+
+    return templates.TemplateResponse(
+        'admin/car_list.html',
+        {
+            'request': request,
+            'user': user,
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
+            'headers': cars[0].keys() if len(cars) > 0 else [],
+            'cars': cars,
+        },
+    )
+
 @router.get('/admin/users')
 def users_list(
     request: Request,
@@ -595,6 +666,32 @@ async def delete_reservation(
     if deleted_rows != 1:
         raise ValueError(f'Expected 1 reservation to be deleted')
 
+@router.post('/admin/delete-car')
+async def delete_car(
+    request: Request,
+    user = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+
+    data = await request.json()
+    vin = data['vin'].strip()
+
+    vin_in_use_query = 'SELECT 1 FROM Rental_Agreement WHERE LOWER(VIN) = :vin'
+    print(vin_in_use_query)
+    vin_in_use = db.execute(text(vin_in_use_query), {'vin': vin}).fetchone()
+    if vin_in_use:
+        raise HTTPException(status_code=400, detail=f'Cannot delete Car with VIN = {vin} since it is in use by a Rental Agreement')
+
+    delete_query = 'DELETE FROM Car WHERE LOWER(VIN) = :vin'
+    print(delete_query)
+    delete_result = db.execute(text(delete_query), {'vin': vin})
+    db.commit()
+
+    deleted_rows = delete_result.rowcount
+    print('Deleted cars:', deleted_rows)
+
+    if deleted_rows != 1:
+        raise ValueError(f'Expected 1 car to be deleted')
 
 @router.get('/admin/queries')
 def admin_queries_get(
@@ -613,7 +710,7 @@ def admin_queries_get(
             for col in row:
                 if row[col] is None:
                     row[col] = ''
-    
+
 
     return templates.TemplateResponse(
         'admin/queries.html',
@@ -623,6 +720,5 @@ def admin_queries_get(
             'first_name': user['first_name'],
             'last_name': user['last_name'],
              'results': results,
-            
         },
     )

@@ -67,7 +67,15 @@ INSERT INTO Car (VIN, Location_ID, Model_ID) VALUES
 ('11234567891', 'Denver Airport', 12),
 ('11234567892', 'Phoenix Downtown', 13),
 ('11234567893', 'Atlanta Central', 14),
-('11234567894', 'Houston Metro', 15);
+('11234567894', 'Houston Metro', 15),
+-- Cars that have never been rented start with 999, for easy testing
+('99923456780', 'Houston Metro', 15),
+('99923456781', 'Houston Metro', 15),
+('99923456782', 'Houston Metro', 15),
+('99923456783', 'Houston Metro', 15),
+('99923456784', 'Houston Metro', 15),
+('99923456785', 'Houston Metro', 15),
+('99923456786', 'Houston Metro', 15);
 
 
 INSERT INTO Customer (Customer_Name, Customer_Address) VALUES
