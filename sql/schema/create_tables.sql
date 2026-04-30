@@ -58,14 +58,15 @@ CREATE TABLE Reservation (
     Pickup_Date_Time TIMESTAMPTZ NOT NULL,
     Return_Date_Time TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (Customer_Name, Customer_Address, Pickup_location_ID, Pickup_Date_Time),
-    FOREIGN KEY (Class_Name) REFERENCES Car_Class(Class_Name)
-        ON DELETE CASCADE
+    CONSTRAINT FK_CLASS_RESERVE FOREIGN KEY (Class_Name) REFERENCES Car_Class(Class_Name)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE,
-    FOREIGN KEY (Customer_Name, Customer_Address) REFERENCES Customer(Customer_Name, Customer_Address)
-        ON DELETE CASCADE
+    CONSTRAINT FK_CUST_RESERVE FOREIGN KEY (Customer_Name, Customer_Address) 
+    REFERENCES Customer(Customer_Name, Customer_Address)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE,
-    FOREIGN KEY (Pickup_Location_ID) REFERENCES Location(Location_ID)
-        ON DELETE CASCADE
+    CONSTRAINT FK_LOCATION_RESERVE FOREIGN KEY (Pickup_Location_ID) REFERENCES Location(Location_ID)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
 
@@ -89,11 +90,12 @@ CREATE TABLE Rental_Agreement (
     Credit_Card_Expiry_Month INT NOT NULL,
     Credit_Card_Expiry_Year INT NOT NULL,
     Total_Cost DOUBLE PRECISION,
-    FOREIGN KEY (Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time) REFERENCES Reservation(Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
-        ON DELETE CASCADE
+    CONSTRAINT FK_CUST_RENTAL FOREIGN KEY (Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
+     REFERENCES Reservation(Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE,
-    FOREIGN KEY (VIN) REFERENCES Car(VIN)
-        ON DELETE CASCADE
+    CONSTRAINT FK_CUST_CAR FOREIGN KEY (VIN) REFERENCES Car(VIN)
+        ON DELETE RESTRICT
         ON UPDATE CASCADE,
     Unique(Customer_Name, Customer_Address, Pickup_Location_ID, Pickup_Date_Time)
 );
@@ -104,7 +106,7 @@ CREATE TABLE Users (
     Is_Admin BOOLEAN NOT NULL DEFAULT FALSE,
     Customer_Name VARCHAR(100) NOT NULL,
     Customer_Address VARCHAR(200) NOT NULL,
-    FOREIGN KEY (Customer_Name, Customer_Address) REFERENCES Customer(Customer_Name, Customer_Address)
+    CONSTRAINT FK_USER_CUST FOREIGN KEY (Customer_Name, Customer_Address) REFERENCES Customer(Customer_Name, Customer_Address)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
